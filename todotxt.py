@@ -3,6 +3,17 @@ from parsimonious.nodes import NodeVisitor
 from datetime import datetime
 
 
+def get_todo_lines(todo_txt_path):
+    with open(todo_txt_path, "r") as f:
+        todos = f.readlines()
+        todo_ls = []
+        for todo in todos:
+            # print(todo.strip())
+            todo_ls.append(todo.strip())
+        todo_ls.sort(key=lambda x: x)
+        return todo_ls
+
+
 def date_to_string(date_obj):
     return date_obj.strftime("%Y-%m-%d")
 

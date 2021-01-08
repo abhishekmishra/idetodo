@@ -1,30 +1,15 @@
-from pathlib import Path
-import os
 import PySimpleGUI as sg
 from config import read_config
-from todotxt import parse_todo_line
+from todotxt import parse_todo_line, get_todo_lines
+from pathlib import Path
+import os
 
 cfg = read_config()
 sg.theme(cfg["theme"])
 
 HOME_DIR = str(Path.home())
-DOCS_DIR = os.path.join(HOME_DIR, "Documents")
-TODO_DIR = os.path.join(DOCS_DIR, "notes", "TODO")
-
-TODO_TXT_PATH = os.path.join(TODO_DIR, "todo.txt")
-
-print(TODO_TXT_PATH)
-
-
-def get_todo_lines():
-    f = open(TODO_TXT_PATH, "r")
-    todos = f.readlines()
-    todo_ls = []
-    for todo in todos:
-        # print(todo.strip())
-        todo_ls.append(todo.strip())
-    return todo_ls
-
+TODO_DIR = os.path.join(HOME_DIR, cfg["todo_dir"])
+TODO_TXT_PATH = os.path.join(TODO_DIR, cfg["todo_file"])
 
 # ------ Menu Definition ------ #
 menu_def = [
@@ -37,7 +22,7 @@ menu_def = [
     ['Help', 'About...'], ]
 
 if __name__ == '__main__':
-    tl = get_todo_lines()
+    tl = get_todo_lines(TODO_TXT_PATH)
     todo_list = []
     for t in tl:
         todo_list.append(parse_todo_line(t.strip()))
@@ -45,8 +30,9 @@ if __name__ == '__main__':
     if todo_list is not None and len(todo_list) > 0:
         selected_todo = todo_list[0]
 
-    print(todo_list)
-    print(selected_todo)
+    # TODO: some of the tests below should be moved to a unit test.
+    # print(todo_list)
+    # print(selected_todo)
     # parse_todo_line(selected_todo.strip())
     # parse_todo_line("x (N) 2021-01-06 2021-01-05 create")
     # parse_todo_line("x 2021-01-06 2021-01-05 create")

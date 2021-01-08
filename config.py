@@ -16,6 +16,6 @@ def read_config():
     with open(_CONFIG_FILE, 'r') as f:
         cfg_text = f.read()
         cfg = lua.execute(cfg_text)
-        print(cfg.items())
-        print(cfg["theme"])
+        # print(cfg.items())
+        # print(cfg["theme"])
     return cfg
