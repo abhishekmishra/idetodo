@@ -28,20 +28,22 @@ class Todo:
                  due_date=None,
                  projects=None, contexts=None):
         self.text = text.strip()
+        self.task = task
+        self.done = done
+        self.priority = priority
+        self.completion_date = completion_date
+        self.creation_date = creation_date
+        self.due_date = due_date
+        self.projects = projects
+        self.contexts = contexts
+
         if self.text:
             self.update_parts_from_text()
         else:
-            self.task = task
-            self.done = done
-            self.priority = priority
-            self.completion_date = completion_date
-            self.creation_date = creation_date,
-            self.due_date = due_date
-            self.projects = projects
-            self.contexts = contexts
             self.update_text_from_parts()
 
     def update_parts_from_text(self):
+        dirty = False
         self.text = self.text.strip()
         tree = todo_txt_grammar.parse(self.text)
         iv = TodoVisitor()
@@ -49,8 +51,18 @@ class Todo:
         self.task = output["task"]
         self.done = output["done"]
         self.priority = output["priority"]
-        self.completion_date = output["completion_date"]
-        self.creation_date = output["creation_date"]
+
+        if output["date1"] is None:
+            self.creation_date = datetime.today()
+            dirty = True
+        elif output["date2"] is None:
+            self.creation_date = output["date1"]
+        else:
+            self.completion_date = output["date1"]
+            self.creation_date = output["date2"]
+
+        if dirty:
+            self.update_text_from_parts()
 
     def update_text_from_parts(self):
         self.text = ""
@@ -63,7 +75,7 @@ class Todo:
         if self.creation_date:
             self.text += date_to_string(self.creation_date) + " "
         if self.task:
-            self.text = self.task
+            self.text += self.task
         return self.text
 
     def __str__(self):
@@ -89,8 +101,8 @@ class TodoVisitor(NodeVisitor):
         "gets todo"
         todo = {"done": visited_children[0][0] if visited_children[0] else False,
                 "priority": visited_children[1][0] if visited_children[1] else None,
-                "completion_date": visited_children[2][0] if visited_children[2] else None,
-                "creation_date": visited_children[3][0] if visited_children[3] else None, "task": visited_children[4],
+                "date1": visited_children[2][0] if visited_children[2] else None,
+                "date2": visited_children[3][0] if visited_children[3] else None, "task": visited_children[4],
                 "text": node.text}
         return todo
 
