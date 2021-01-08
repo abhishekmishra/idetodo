@@ -37,7 +37,7 @@ class Todo:
         self.due_date = due_date
         self.projects = projects
         self.contexts = contexts
-
+        self.properties = None
         if self.text:
             self.update_parts_from_text()
         else:
@@ -53,8 +53,17 @@ class Todo:
         if self.task:
             self.projects = [x[1:] for x in re.findall(r'\+\w+', self.task)]
             self.contexts = [x[1:] for x in re.findall(r'@\w+', self.task)]
+            props = re.findall(r'\w+:[\w-]+', self.task)
+            self.properties = {}
+            for p in props:
+                x = p.split(':', 1)
+                self.properties[x[0]] = x[1]
+            if 'due' in self.properties:
+                self.due_date = datetime.strptime(self.properties['due'], '%Y-%m-%d')
             print(self.projects)
             print(self.contexts)
+            print(self.properties)
+            print(self.due_date)
         self.done = output["done"]
         self.priority = output["priority"]
 
@@ -139,7 +148,7 @@ class TodoVisitor(NodeVisitor):
 
 
 if __name__ == '__main__':
-    Todo(text="2021-01-05 create @blah +bluh")
+    Todo(text="2021-01-05 create @blah +bluh a:b due:2007-01-02")
     # t = todo_txt_grammar.parse("2021-01-05 create @blah +bluh")
     # v = TodoVisitor()
     # o = v.visit(t)
