@@ -49,10 +49,13 @@ if __name__ == '__main__':
         [sg.Input(default_text=selected_todo.text, key="-TODOTEXT-", size=(LAYOUT_WIDTH, None))],
         [sg.Listbox(key="-TODOLIST-", values=todo_list,
                     default_values=[selected_todo], size=(LAYOUT_WIDTH, 20), enable_events=True)],
-        [sg.Button("Quit")]
+        # [sg.Button("Quit")],
+        [sg.StatusBar("Filter", key="-STATUSBAR_FILTER-"), sg.StatusBar("Sort", key="-STATUSBAR_SORT-"),
+         sg.StatusBar("Tasks", key="-STATUSBAR_TASKS-"), sg.StatusBar("Incomplete", key="-STATUSBAR_INCOMPLETE-"),
+         sg.StatusBar("Due Today", key="-STATUSBAR_DUE_TODAY-"), sg.StatusBar("Overdue", key="-STATUSBAR_OVERDUE-")]
     ]
 
-    window = sg.Window('todotxt ide', layout)
+    window = sg.Window('IDETODO', layout)
 
     # see docs - persistent window - multiple reads using an event loop
     while True:
