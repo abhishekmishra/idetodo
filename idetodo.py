@@ -1,6 +1,6 @@
 import PySimpleGUI as sg
 from config import read_config
-from todotxt import parse_todo_line, get_todo_lines
+from todotxt import get_todos, Todo, add_todos
 from pathlib import Path
 import os
 
@@ -22,10 +22,7 @@ menu_def = [
     ['Help', 'About...'], ]
 
 if __name__ == '__main__':
-    tl = get_todo_lines(TODO_TXT_PATH)
-    todo_list = []
-    for t in tl:
-        todo_list.append(parse_todo_line(t.strip()))
+    todo_list = get_todos(TODO_TXT_PATH)
     selected_todo = None
     if todo_list is not None and len(todo_list) > 0:
         selected_todo = todo_list[0]
@@ -62,6 +59,8 @@ if __name__ == '__main__':
             break
         if event == '-SUBMIT_TODOTEXT-':
             todo_added = values['-TODOTEXT-']
+            add_todos(todo_list, Todo(text=todo_added))
+            window['-TODOLIST-'].update(todo_list)
             window['-TODOTEXT-'].update("")
         if len(values['-TODOLIST-']) > 0:
             selected_todo = values['-TODOLIST-'][0]

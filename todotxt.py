@@ -3,15 +3,20 @@ from parsimonious.nodes import NodeVisitor
 from datetime import datetime
 
 
-def get_todo_lines(todo_txt_path):
+def get_todos(todo_txt_path):
     with open(todo_txt_path, "r") as f:
         todos = f.readlines()
         todo_ls = []
         for todo in todos:
             # print(todo.strip())
-            todo_ls.append(todo.strip())
-        todo_ls.sort(key=lambda x: x)
+            todo_ls.append(Todo(text=todo.strip()))
+        todo_ls.sort(key=lambda x: x.text)
         return todo_ls
+
+
+def add_todos(todo_ls, todo_item):
+    todo_ls.append(todo_item)
+    todo_ls.sort(key=lambda x: x.text)
 
 
 def date_to_string(date_obj):
@@ -22,19 +27,30 @@ class Todo:
     def __init__(self, text=None, task=None, done=False, priority=None, completion_date=None, creation_date=None,
                  due_date=None,
                  projects=None, contexts=None):
-        self.text = text
-        self.task = task
-        self.done = done
-        self.priority = priority
-        self.completion_date = completion_date
-        self.creation_date = creation_date,
-        self.due_date = due_date
-        self.projects = projects
-        self.contexts = contexts
+        self.text = text.strip()
+        if self.text:
+            self.update_parts_from_text()
+        else:
+            self.task = task
+            self.done = done
+            self.priority = priority
+            self.completion_date = completion_date
+            self.creation_date = creation_date,
+            self.due_date = due_date
+            self.projects = projects
+            self.contexts = contexts
+            self.update_text_from_parts()
 
     def update_parts_from_text(self):
-        # TODO:call the parser here
-        pass
+        self.text = self.text.strip()
+        tree = todo_txt_grammar.parse(self.text)
+        iv = TodoVisitor()
+        output = iv.visit(tree)
+        self.task = output["task"]
+        self.done = output["done"]
+        self.priority = output["priority"]
+        self.completion_date = output["completion_date"]
+        self.creation_date = output["creation_date"]
 
     def update_text_from_parts(self):
         self.text = ""
@@ -71,15 +87,11 @@ todo_txt_grammar = Grammar(r"""
 class TodoVisitor(NodeVisitor):
     def visit_todo(self, node, visited_children):
         "gets todo"
-        todo = Todo(
-            done=visited_children[0][0] if visited_children[0] else False,
-            priority=visited_children[1][0] if visited_children[1] else None,
-            completion_date=visited_children[2][0] if visited_children[2] else None,
-            creation_date=visited_children[3][0] if visited_children[3] else None,
-            task=visited_children[4],
-            text=node.text
-        )
-
+        todo = {"done": visited_children[0][0] if visited_children[0] else False,
+                "priority": visited_children[1][0] if visited_children[1] else None,
+                "completion_date": visited_children[2][0] if visited_children[2] else None,
+                "creation_date": visited_children[3][0] if visited_children[3] else None, "task": visited_children[4],
+                "text": node.text}
         return todo
 
     def visit_priority(self, node, visited_children):
@@ -106,12 +118,3 @@ class TodoVisitor(NodeVisitor):
         """ The generic visit method. """
         # changed this from returning node, so as to return only matched items
         return visited_children or None
-
-
-def parse_todo_line(line):
-    # print(line)
-    tree = todo_txt_grammar.parse(line.rstrip())
-    iv = TodoVisitor()
-    output = iv.visit(tree)
-    # print(output)
-    return output
