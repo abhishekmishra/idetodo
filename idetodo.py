@@ -43,7 +43,8 @@ if __name__ == '__main__':
 
     layout = [
         [sg.Menu(menu_def)],
-        [sg.Input(default_text=selected_todo.text, key="-TODOTEXT-", size=(LAYOUT_WIDTH, None))],
+        [sg.Input(default_text="", key="-TODOTEXT-", size=(LAYOUT_WIDTH, None), enable_events=True),
+         sg.Button('-SUBMIT_TODOTEXT-', visible=False, bind_return_key=True)],
         [sg.Listbox(key="-TODOLIST-", values=todo_list,
                     default_values=[selected_todo], size=(LAYOUT_WIDTH, 20), enable_events=True)],
         # [sg.Button("Quit")],
@@ -59,9 +60,12 @@ if __name__ == '__main__':
         event, values = window.read()
         if event == sg.WIN_CLOSED or event == 'Quit':
             break
+        if event == '-SUBMIT_TODOTEXT-':
+            todo_added = values['-TODOTEXT-']
+            window['-TODOTEXT-'].update("")
         if len(values['-TODOLIST-']) > 0:
             selected_todo = values['-TODOLIST-'][0]
-            window['-TODOTEXT-'].update(selected_todo.text)
-        print(event, values)
+
+        # print(event, values)
 
     window.close()
