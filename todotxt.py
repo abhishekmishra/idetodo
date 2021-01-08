@@ -1,6 +1,7 @@
 from parsimonious.grammar import Grammar
 from parsimonious.nodes import NodeVisitor
 from datetime import datetime
+import re
 
 
 def get_todos(todo_txt_path):
@@ -49,6 +50,11 @@ class Todo:
         iv = TodoVisitor()
         output = iv.visit(tree)
         self.task = output["task"]
+        if self.task:
+            self.projects = [x[1:] for x in re.findall(r'\+\w+', self.task)]
+            self.contexts = [x[1:] for x in re.findall(r'@\w+', self.task)]
+            print(self.projects)
+            print(self.contexts)
         self.done = output["done"]
         self.priority = output["priority"]
 
@@ -130,3 +136,12 @@ class TodoVisitor(NodeVisitor):
         """ The generic visit method. """
         # changed this from returning node, so as to return only matched items
         return visited_children or None
+
+
+if __name__ == '__main__':
+    Todo(text="2021-01-05 create @blah +bluh")
+    # t = todo_txt_grammar.parse("2021-01-05 create @blah +bluh")
+    # v = TodoVisitor()
+    # o = v.visit(t)
+    # print(t)
+    # print(o)
