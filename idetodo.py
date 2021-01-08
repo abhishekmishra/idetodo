@@ -5,6 +5,27 @@ from parsimonious.grammar import Grammar
 from parsimonious.nodes import NodeVisitor
 from datetime import datetime
 
+_CONFIG_FILE = "idetodo.cfg"
+
+import lupa
+from lupa import LuaRuntime
+
+lua = LuaRuntime(unpack_returned_tuples=True)
+print(lua.execute('''
+    x = 10
+    print(x)
+    return x
+'''))
+
+cfg = None
+
+with open(_CONFIG_FILE, 'r') as f:
+    cfgtext = f.read()
+    cfg = lua.execute(cfgtext)
+    print(cfg.items())
+    print(cfg["theme"])
+
+sg.theme(cfg["theme"])
 
 def date_to_string(date_obj):
     return date_obj.strftime("%Y-%m-%d")
@@ -25,7 +46,7 @@ class Todo:
         self.contexts = contexts
 
     def update_parts_from_text(self):
-        #TODO:call the parser here
+        # TODO:call the parser here
         pass
 
     def update_text_from_parts(self):
