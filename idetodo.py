@@ -26,6 +26,16 @@ def get_todo_lines():
     return todo_ls
 
 
+# ------ Menu Definition ------ #
+menu_def = [
+    ['File', ['New', 'Open', 'Print', 'Print Preview', 'Archive Completed Tasks', 'Reload File', 'Options', 'Exit',
+              'Properties']],
+    ['Edit', ['Cut', 'Copy', 'Copy Task to New Task', 'Paste', 'Undo'], ],
+    ['Task'],
+    ['Sort'],
+    ['Filter'],
+    ['Help', 'About...'], ]
+
 if __name__ == '__main__':
     tl = get_todo_lines()
     todo_list = []
@@ -46,6 +56,7 @@ if __name__ == '__main__':
     LAYOUT_WIDTH = 100
 
     layout = [
+        [sg.Menu(menu_def)],
         [sg.Input(default_text=selected_todo.text, key="-TODOTEXT-", size=(LAYOUT_WIDTH, None))],
         [sg.Listbox(key="-TODOLIST-", values=todo_list,
                     default_values=[selected_todo], size=(LAYOUT_WIDTH, 20), enable_events=True)],
