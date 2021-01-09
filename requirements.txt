@@ -3,3 +3,5 @@ lupa
 parsimonious
 Pillow
 Jinja2
+pandas
+ipython

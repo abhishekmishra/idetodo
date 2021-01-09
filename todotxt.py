@@ -26,7 +26,7 @@ def date_to_string(date_obj):
 
 class Todo:
     def __init__(self, text=None, task=None, done=False, priority=None, completion_date=None, creation_date=None,
-                 due_date=None,
+                 due=None,
                  projects=None, contexts=None):
         self.text = text.strip()
         self.task = task
@@ -34,7 +34,7 @@ class Todo:
         self.priority = priority
         self.completion_date = completion_date
         self.creation_date = creation_date
-        self.due_date = due_date
+        self.due = due
         self.projects = projects
         self.contexts = contexts
         self.properties = None
@@ -59,11 +59,11 @@ class Todo:
                 x = p.split(':', 1)
                 self.properties[x[0]] = x[1]
             if 'due' in self.properties:
-                self.due_date = datetime.strptime(self.properties['due'], '%Y-%m-%d')
-            print(self.projects)
-            print(self.contexts)
-            print(self.properties)
-            print(self.due_date)
+                self.due = datetime.strptime(self.properties['due'], '%Y-%m-%d')
+            # print(self.projects)
+            # print(self.contexts)
+            # print(self.properties)
+            # print(self.due_date)
         self.done = output["done"]
         self.priority = output["priority"]
 
@@ -95,6 +95,18 @@ class Todo:
 
     def __str__(self):
         return self.text
+
+    def as_dict(self):
+        return {
+            "text": self.text,
+            "task": self.task,
+            "done": self.done,
+            "priority": self.priority,
+            "completion_date": self.completion_date,
+            "creation_date": self.creation_date,
+            "due": self.due,
+            "properties": self.properties
+        }
 
 
 todo_txt_grammar = Grammar(r"""

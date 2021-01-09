@@ -3,6 +3,7 @@ from config import read_config
 from todotxt import get_todos, Todo, add_todos
 from pathlib import Path
 import os
+from view_calendar import weekly_agenda
 
 cfg = read_config()
 sg.theme(cfg["theme"])
@@ -19,6 +20,7 @@ menu_def = [
     ['Task'],
     ['Sort'],
     ['Filter'],
+    ['Report', ['Daily']],
     ['Help', 'About'], ]
 
 if __name__ == '__main__':
@@ -62,6 +64,8 @@ if __name__ == '__main__':
             add_todos(todo_list, Todo(text=todo_added))
             window['-TODOLIST-'].update(todo_list)
             window['-TODOTEXT-'].update("")
+        if event == 'Daily':
+            weekly_agenda(todo_list)
         if event == 'About':
             sg.popup_ok("IDETODO v0.01:\nA productivity IDE based on the todo.txt file format. "
                         "UX heavily inspired from todotxt.net", title="About IDETODO v0.01", non_blocking=True,
@@ -70,6 +74,7 @@ if __name__ == '__main__':
         if len(values['-TODOLIST-']) > 0:
             selected_todo = values['-TODOLIST-'][0]
 
+        print(event)
         # print(event, values)
 
     window.close()
