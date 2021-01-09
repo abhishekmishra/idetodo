@@ -6,7 +6,31 @@ import os
 from view_calendar import weekly_agenda
 from lupa import LuaRuntime
 
+
+def todo(todo_txt):
+    todo_new = Todo(text=todo_txt)
+    add_todos(todo_list, todo_new)
+    window['-TODOLIST-'].update(todo_list)
+    idx = 0
+    for t in todo_list:
+        if t == todo_new:
+            break
+        idx += 1
+    window['-TODOLIST-'].SetValue([todo_new])
+    window['-TODOLIST-'].set_vscroll_position(idx * 1.0 / len(todo_list))
+
+
 lua = LuaRuntime(unpack_returned_tuples=True)
+lua.execute("""
+function popup(text)
+    python.eval("sg.popup_ok('" .. text .. "')")
+end
+
+function todo(todo_txt)
+    python.eval("todo('" .. todo_txt .. "')")
+end
+""")
+
 cfg = read_config(lua)
 sg.theme(cfg["theme"])
 
@@ -59,7 +83,7 @@ if __name__ == '__main__':
          sg.StatusBar("Due Today", key="-STATUSBAR_DUE_TODAY-"), sg.StatusBar("Overdue", key="-STATUSBAR_OVERDUE-")]
     ]
 
-    window = sg.Window('IDETODO', layout, resizable=True)
+    window = sg.Window('IDETODO', layout)
 
     # see docs - persistent window - multiple reads using an event loop
     while True:
