@@ -19,7 +19,7 @@ menu_def = [
     ['Task'],
     ['Sort'],
     ['Filter'],
-    ['Help', 'About...'], ]
+    ['Help', 'About'], ]
 
 if __name__ == '__main__':
     todo_list = get_todos(TODO_TXT_PATH)
@@ -62,6 +62,11 @@ if __name__ == '__main__':
             add_todos(todo_list, Todo(text=todo_added))
             window['-TODOLIST-'].update(todo_list)
             window['-TODOTEXT-'].update("")
+        if event == 'About':
+            sg.popup_ok("IDETODO v0.01:\nA productivity IDE based on the todo.txt file format. "
+                        "UX heavily inspired from todotxt.net", title="About IDETODO v0.01", non_blocking=True,
+                        no_titlebar=True,
+                        keep_on_top=True, modal=True)
         if len(values['-TODOLIST-']) > 0:
             selected_todo = values['-TODOLIST-'][0]
 
