@@ -1,10 +1,7 @@
-from lupa import LuaRuntime
-
 _CONFIG_FILE = "idetodo.cfg"
 
 
-def read_config():
-    lua = LuaRuntime(unpack_returned_tuples=True)
+def read_config(lua):
     # print(lua.execute('''
     #     x = 10
     #     print(x)

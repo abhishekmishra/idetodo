@@ -4,8 +4,10 @@ from todotxt import get_todos, Todo, add_todos
 from pathlib import Path
 import os
 from view_calendar import weekly_agenda
+from lupa import LuaRuntime
 
-cfg = read_config()
+lua = LuaRuntime(unpack_returned_tuples=True)
+cfg = read_config(lua)
 sg.theme(cfg["theme"])
 
 HOME_DIR = str(Path.home())
@@ -42,17 +44,22 @@ if __name__ == '__main__':
 
     layout = [
         [sg.Menu(menu_def)],
-        [sg.Input(default_text="", key="-TODOTEXT-", size=(LAYOUT_WIDTH, None), enable_events=True),
-         sg.Button('-SUBMIT_TODOTEXT-', visible=False, bind_return_key=True)],
+        # [sg.Input(default_text="", key="-TODOTEXT-", size=(LAYOUT_WIDTH, None), enable_events=True),
+        #  sg.Button('-SUBMIT_TODOTEXT-', visible=False, bind_return_key=True)],
         [sg.Listbox(key="-TODOLIST-", values=todo_list,
-                    default_values=[selected_todo], size=(LAYOUT_WIDTH, 20), enable_events=True)],
+                    default_values=[selected_todo], size=(LAYOUT_WIDTH, 20), enable_events=True, auto_size_text=True)],
         # [sg.Button("Quit")],
+        [sg.Multiline(default_text="", key="-LUAOUTPUT-", size=(LAYOUT_WIDTH, 5),
+                      disabled=True, autoscroll=True)],
+        [sg.T(text="IDETODO >>", size=(10, None)),
+         sg.Input(default_text="", key="-LUALINE-", size=(LAYOUT_WIDTH - 11, None), enable_events=True, focus=True),
+         sg.Button('-SUBMIT_LUALINE-', visible=False, bind_return_key=True)],
         [sg.StatusBar("Filter", key="-STATUSBAR_FILTER-"), sg.StatusBar("Sort", key="-STATUSBAR_SORT-"),
          sg.StatusBar("Tasks", key="-STATUSBAR_TASKS-"), sg.StatusBar("Incomplete", key="-STATUSBAR_INCOMPLETE-"),
          sg.StatusBar("Due Today", key="-STATUSBAR_DUE_TODAY-"), sg.StatusBar("Overdue", key="-STATUSBAR_OVERDUE-")]
     ]
 
-    window = sg.Window('IDETODO', layout)
+    window = sg.Window('IDETODO', layout, resizable=True)
 
     # see docs - persistent window - multiple reads using an event loop
     while True:
@@ -64,6 +71,16 @@ if __name__ == '__main__':
             add_todos(todo_list, Todo(text=todo_added))
             window['-TODOLIST-'].update(todo_list)
             window['-TODOTEXT-'].update("")
+        if event == '-SUBMIT_LUALINE-':
+            # read
+            lua_input = values['-LUALINE-']
+            # eval
+            x = lua.eval(lua_input)
+            # print
+            print(lua_input)
+            window['-LUAOUTPUT-'].update(values['-LUAOUTPUT-'] + '\n> ' + lua_input + '\n' + str(x))
+            # loop
+            window['-LUALINE-'].update("")
         if event == 'Daily':
             weekly_agenda(todo_list)
         if event == 'About':
