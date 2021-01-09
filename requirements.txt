@@ -2,3 +2,4 @@ PySimpleGUI
 lupa
 parsimonious
 Pillow
+Jinja2
