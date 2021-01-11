@@ -6,6 +6,9 @@ import os
 from view_calendar import weekly_agenda
 from lupa import LuaRuntime
 
+win_values = None
+win_event = None
+
 
 def todo(todo_txt):
     todo_new = Todo(text=todo_txt)
@@ -29,7 +32,9 @@ def update(todo_row):
 
 
 def selected():
-    pass
+    if len(win_values['-TODOLIST-']) == 1:
+        return win_values['-TODOLIST-'][0]
+    return None
 
 
 lua = LuaRuntime(unpack_returned_tuples=True)
@@ -40,6 +45,7 @@ end
 
 todo = pyfunc("todo")
 save = pyfunc("save")
+selected = pyfunc("selected")
 debug = pyfunc("sg.Print")
 popup_ok = pyfunc("sg.popup_ok")
 
@@ -101,35 +107,30 @@ if __name__ == '__main__':
 
     # see docs - persistent window - multiple reads using an event loop
     while True:
-        event, values = window.read()
-        if event == sg.WIN_CLOSED or event == 'Quit':
+        win_event, win_values = window.read()
+        if win_event == sg.WIN_CLOSED or win_event == 'Quit':
             break
-        if event == '-SUBMIT_TODOTEXT-':
-            todo_added = values['-TODOTEXT-']
-            add_todos(todo_list, Todo(text=todo_added))
-            window['-TODOLIST-'].update(todo_list)
-            window['-TODOTEXT-'].update("")
-        if event == '-SUBMIT_LUALINE-':
+        if win_event == '-SUBMIT_LUALINE-':
             # read
-            lua_input = values['-LUALINE-']
+            lua_input = win_values['-LUALINE-']
             # eval
             x = lua.eval(lua_input)
             # print
             print(lua_input)
-            window['-LUAOUTPUT-'].update(values['-LUAOUTPUT-'] + '\n> ' + lua_input + '\n' + str(x))
+            window['-LUAOUTPUT-'].update(win_values['-LUAOUTPUT-'] + '\n> ' + lua_input + '\n' + str(x))
             # loop
             window['-LUALINE-'].update("")
-        if event == 'Daily':
+        if win_event == 'Daily':
             weekly_agenda(todo_list)
-        if event == 'About':
+        if win_event == 'About':
             sg.popup_ok("IDETODO v0.01:\nA productivity IDE based on the todo.txt file format. "
                         "UX heavily inspired from todotxt.net", title="About IDETODO v0.01", non_blocking=True,
                         no_titlebar=True,
                         keep_on_top=True, modal=True)
-        if len(values['-TODOLIST-']) > 0:
-            selected_todo = values['-TODOLIST-'][0]
+        if len(win_values['-TODOLIST-']) > 0:
+            selected_todo = win_values['-TODOLIST-'][0]
 
-        print(event)
+        print(win_event)
         # print(event, values)
 
     window.close()
