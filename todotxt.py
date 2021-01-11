@@ -147,7 +147,7 @@ class Todo:
             "priority": self.priority,
             "completion_date": self.completion_date,
             "creation_date": self.creation_date,
-            "due": self.due,
+            "due": self.get_due(),
             "properties": self.properties
         }
 

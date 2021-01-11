@@ -33,7 +33,7 @@ def weekly_agenda(tasks, get_config=lambda x, d: d, today=None):
     if today is None:
         today = date.today()
 
-    df = pd.DataFrame([x.as_dict() for x in tasks])
+    df = pd.DataFrame([x.as_dict() for x in tasks.ls])
     print(df)
     df['month'] = pd.DatetimeIndex(df['due']).month
     df['year'] = pd.DatetimeIndex(df['due']).year
