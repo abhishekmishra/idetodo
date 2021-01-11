@@ -68,8 +68,15 @@ def reload():
     _refresh_todos(todos.ls[idx])
 
 
-def update(todo_row):
-    pass
+def update_ask(todo_row):
+    if todo_row is None:
+        todo_row = selected()
+    idx = todos.ls.index(todo_row)
+    todo_text = sg.PopupGetText("Update todo:", "Update todo", todo_row.text)
+    todo_new = Todo(text=todo_text)
+    todos.replace(idx, todo_new)
+    _refresh_todos(todo_new)
+    return todo_new
 
 
 def selected():
@@ -92,6 +99,7 @@ end
 todo = pyfunc("todo")
 daily_todo=pyfunc("daily_todo")
 todo_ask = pyfunc("todo_ask")
+update_ask = pyfunc("update_ask")
 save = pyfunc("save")
 reload = pyfunc("reload")
 selected = pyfunc("selected")
@@ -133,7 +141,7 @@ menu_def = [
     ['&File', ['New', 'Open', 'Print', 'Print Preview', 'Archive Completed Tasks', file_reload, 'Options', 'Exit',
                'Properties']],
     ['Edit', ['Cut', 'Copy', 'Copy Task to New Task', 'Paste', 'Undo'], ],
-    ['&Task', [task_new], [task_update], [task_done]],
+    ['&Task', [task_new, task_update, task_done]],
     ['Sort'],
     ['Filter'],
     ['Report', ['Daily']],
@@ -227,6 +235,9 @@ if __name__ == '__main__':
         if win_event in (get_menu_key(task_new), 'n:78'):
             lualine_eval_print("todo_ask()")
 
+        if win_event in (get_menu_key(task_update), 'u:85'):
+            lualine_eval_print("update_ask(nil)")
+
         if win_event in (get_menu_key(file_reload), 'period:190'):
             lualine_eval_print("reload()")
 
@@ -248,6 +259,6 @@ if __name__ == '__main__':
         if len(win_values['-TODOLIST-']) > 0:
             selected_todo = win_values['-TODOLIST-'][0]
 
-        # print(win_event)
+        print(win_event)
 
     window.close()

@@ -29,7 +29,10 @@ class TodoList:
 
     def add_todos(self, todo_item):
         self._todos.insert(0, todo_item)
-        todo_item.row = len(self._todos)
+        self.update_view()
+
+    def replace(self, i, todo_item):
+        self._todos[i] = todo_item
         self.update_view()
 
     def save_todos(self):
