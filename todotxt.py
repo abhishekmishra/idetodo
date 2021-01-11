@@ -1,6 +1,6 @@
 from parsimonious.grammar import Grammar
 from parsimonious.nodes import NodeVisitor
-from datetime import datetime
+from datetime import datetime, date
 import re
 
 
@@ -59,14 +59,16 @@ class Todo:
         self.priority = priority
         self.completion_date = completion_date
         self.creation_date = creation_date
-        self.due = due
         self.projects = projects
         self.contexts = contexts
-        self.properties = None
+        self.properties = {}
         if self.text:
             self.update_parts_from_text()
         else:
             self.update_text_from_parts()
+
+        if due is not None:
+            self.set_due(due)
 
     def update_parts_from_text(self):
         dirty = False
@@ -79,16 +81,9 @@ class Todo:
             self.projects = [x[1:] for x in re.findall(r'\+\w+', self.task)]
             self.contexts = [x[1:] for x in re.findall(r'@\w+', self.task)]
             props = re.findall(r'\w+:[\w-]+', self.task)
-            self.properties = {}
             for p in props:
                 x = p.split(':', 1)
                 self.properties[x[0]] = x[1]
-            if 'due' in self.properties:
-                self.due = datetime.strptime(self.properties['due'], '%Y-%m-%d')
-            # print(self.projects)
-            # print(self.contexts)
-            # print(self.properties)
-            # print(self.due_date)
         self.done = output["done"]
         self.priority = output["priority"]
 
@@ -117,6 +112,26 @@ class Todo:
         if self.task:
             self.text += self.task
         return self.text
+
+    def set_property(self, name, value):
+        new_prop = False
+        if name in self.properties:
+            re.replace(rf'{re.escape(name)}:[\w-]+', name + ':' + value, self.task)
+        else:
+            new_prop = True
+            self.task += " " + name + ":" + value
+        self.properties[name] = value
+        if new_prop:
+            self.update_text_from_parts()
+
+    def get_due(self):
+        if 'due' in self.properties:
+            return datetime.strptime(self.properties['due'], '%Y-%m-%d').date()
+        else:
+            return None
+
+    def set_due(self, dt):
+        self.set_property('due', dt.strftime('%Y-%m-%d'))
 
     def __str__(self):
         return self.text

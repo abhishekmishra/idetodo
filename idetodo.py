@@ -6,6 +6,7 @@ import os
 import sys
 from view_calendar import weekly_agenda
 from lupa import LuaRuntime, LuaSyntaxError, LuaError
+from datetime import date, timedelta
 
 win_values = None
 win_event = None
@@ -21,9 +22,7 @@ def todo_ask():
         return "cancelled"
 
 
-def todo(todo_txt):
-    todo_new = Todo(text=todo_txt)
-    todos.add_todos(todo_new)
+def _refresh_todos(todo_new=1):
     window['-TODOLIST-'].update(todos.ls)
     window['-TODOLIST-'].SetValue([todo_new])
     idx = 0
@@ -32,7 +31,29 @@ def todo(todo_txt):
             break
         idx += 1
     window['-TODOLIST-'].set_vscroll_position(idx * 1.0 / len(todos.ls))
+
+
+def todo(todo_txt):
+    todo_new = Todo(text=todo_txt)
+    todos.add_todos(todo_new)
+    _refresh_todos(todo_new)
     return todo_new
+
+
+def daily_todo(todo_txt, num_days=7):
+    """
+    Create a number of tasks for the coming days
+    starting today, and up to num_days.
+    All have the same text except the due date.
+    """
+    today = date.today()
+    d = timedelta(days=1)
+    for i in range(num_days):
+        todo_new = Todo(text=todo_txt)
+        todo_new.set_due(today + (i * d))
+        todo_new.update_text_from_parts()
+        todos.add_todos(todo_new)
+        _refresh_todos(todo_new)
 
 
 def save():
@@ -60,6 +81,7 @@ function pyfunc(name)
 end
 
 todo = pyfunc("todo")
+daily_todo=pyfunc("daily_todo")
 todo_ask = pyfunc("todo_ask")
 save = pyfunc("save")
 selected = pyfunc("selected")
