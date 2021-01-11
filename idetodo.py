@@ -69,7 +69,7 @@ menu_def = [
     ['File', ['New', 'Open', 'Print', 'Print Preview', 'Archive Completed Tasks', 'Reload File', 'Options', 'Exit',
               'Properties']],
     ['Edit', ['Cut', 'Copy', 'Copy Task to New Task', 'Paste', 'Undo'], ],
-    ['Task'],
+    ['Task', ['&New']],
     ['Sort'],
     ['Filter'],
     ['Report', ['Daily']],
@@ -109,7 +109,7 @@ if __name__ == '__main__':
          sg.StatusBar("Due Today", key="-STATUSBAR_DUE_TODAY-"), sg.StatusBar("Overdue", key="-STATUSBAR_OVERDUE-")]
     ]
 
-    window = sg.Window('IDETODO', layout)
+    window = sg.Window('IDETODO', layout, return_keyboard_events=True, margins=(0, 0))
 
     # see docs - persistent window - multiple reads using an event loop
     while True:
@@ -150,7 +150,6 @@ if __name__ == '__main__':
         if len(win_values['-TODOLIST-']) > 0:
             selected_todo = win_values['-TODOLIST-'][0]
 
-        print(win_event)
-        # print(event, values)
+        print(win_event, win_values)
 
     window.close()
