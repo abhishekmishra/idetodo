@@ -3,8 +3,9 @@ from config import read_config
 from todotxt import get_todos, Todo, add_todos, save_todos
 from pathlib import Path
 import os
+import sys
 from view_calendar import weekly_agenda
-from lupa import LuaRuntime
+from lupa import LuaRuntime, LuaSyntaxError, LuaError
 
 win_values = None
 win_event = None
@@ -37,6 +38,10 @@ def selected():
     return None
 
 
+def agenda():
+    weekly_agenda(todo_list)
+
+
 lua = LuaRuntime(unpack_returned_tuples=True)
 lua.execute("""
 function pyfunc(name)
@@ -48,6 +53,7 @@ save = pyfunc("save")
 selected = pyfunc("selected")
 debug = pyfunc("sg.Print")
 popup_ok = pyfunc("sg.popup_ok")
+agenda = pyfunc("agenda")
 
 """)
 
@@ -114,14 +120,28 @@ if __name__ == '__main__':
             # read
             lua_input = win_values['-LUALINE-']
             # eval
-            x = lua.eval(lua_input)
+            lua_output = None
+            try:
+                lua_output = lua.execute(lua_input)
+            except LuaSyntaxError as syntax_error:
+                try:
+                    lua_output = lua.eval(lua_input)
+                except LuaSyntaxError as syntax_error_2:
+                    lua_output = syntax_error
+                except LuaError as lua_error:
+                    lua_output = lua_error
+            except LuaError as lua_error:
+                lua_output = lua_error
+            except:
+                lua_output = "Unexpected error:", sys.exc_info()[0]
             # print
             print(lua_input)
-            window['-LUAOUTPUT-'].update(win_values['-LUAOUTPUT-'] + '\n> ' + lua_input + '\n' + str(x))
+            window['-LUAOUTPUT-'].print('> ', lua_input, text_color='red')
+            window['-LUAOUTPUT-'].print(str(lua_output), text_color='green')
             # loop
             window['-LUALINE-'].update("")
         if win_event == 'Daily':
-            weekly_agenda(todo_list)
+            agenda()
         if win_event == 'About':
             sg.popup_ok("IDETODO v0.01:\nA productivity IDE based on the todo.txt file format. "
                         "UX heavily inspired from todotxt.net", title="About IDETODO v0.01", non_blocking=True,
