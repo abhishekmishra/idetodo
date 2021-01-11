@@ -22,14 +22,15 @@ def todo_ask():
         return "cancelled"
 
 
-def _refresh_todos(todo_new=1):
+def _refresh_todos(select=None):
     window['-TODOLIST-'].update(todos.ls)
-    window['-TODOLIST-'].SetValue([todo_new])
+    window['-TODOLIST-'].SetValue([select])
     idx = 0
-    for t in todos.ls:
-        if t == todo_new:
-            break
-        idx += 1
+    if select is not None:
+        for t in todos.ls:
+            if t == select:
+                break
+            idx += 1
     window['-TODOLIST-'].set_vscroll_position(idx * 1.0 / len(todos.ls))
 
 
@@ -60,14 +61,22 @@ def save():
     todos.save_todos()
 
 
+def reload():
+    sel = selected()
+    idx = 0 if sel is None else todos.ls.index(sel)
+    todos.get_todos()
+    _refresh_todos(todos.ls[idx])
+
+
 def update(todo_row):
     pass
 
 
 def selected():
+    s = None
     if len(win_values['-TODOLIST-']) == 1:
-        return win_values['-TODOLIST-'][0]
-    return None
+        s = win_values['-TODOLIST-'][0]
+    return s
 
 
 def agenda():
@@ -84,6 +93,7 @@ todo = pyfunc("todo")
 daily_todo=pyfunc("daily_todo")
 todo_ask = pyfunc("todo_ask")
 save = pyfunc("save")
+reload = pyfunc("reload")
 selected = pyfunc("selected")
 debug = pyfunc("sg.Print")
 popup_ok = pyfunc("sg.popup_ok")
@@ -117,9 +127,11 @@ def get_menu_key(menu_item_str):
 task_new = '&New    (Ctrl-N)::task_new'
 task_update = '&Update (Ctrl-U)::task_update'
 task_done = '&Done (Ctrl-U)::task_done'
+
+file_reload = '&Reload File  (Ctrl-.)::file_reload'
 menu_def = [
-    ['File', ['New', 'Open', 'Print', 'Print Preview', 'Archive Completed Tasks', 'Reload File', 'Options', 'Exit',
-              'Properties']],
+    ['&File', ['New', 'Open', 'Print', 'Print Preview', 'Archive Completed Tasks', file_reload, 'Options', 'Exit',
+               'Properties']],
     ['Edit', ['Cut', 'Copy', 'Copy Task to New Task', 'Paste', 'Undo'], ],
     ['&Task', [task_new], [task_update], [task_done]],
     ['Sort'],
@@ -214,6 +226,9 @@ if __name__ == '__main__':
 
         if win_event in (get_menu_key(task_new), 'n:78'):
             lualine_eval_print("todo_ask()")
+
+        if win_event in (get_menu_key(file_reload), 'period:190'):
+            lualine_eval_print("reload()")
 
         if win_event == '-SUBMIT_LUALINE-':
             # read
