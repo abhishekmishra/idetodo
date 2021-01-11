@@ -11,6 +11,14 @@ win_values = None
 win_event = None
 
 
+def todo_ask():
+    todo_text = sg.PopupGetText("Add todo:", "Add todo")
+    if todo_text:
+        lualine_eval_print("todo('" + todo_text + "')")
+    else:
+        return "cancelled"
+
+
 def todo(todo_txt):
     todo_new = Todo(text=todo_txt)
     add_todos(todo_list, todo_new)
@@ -49,6 +57,7 @@ function pyfunc(name)
 end
 
 todo = pyfunc("todo")
+todo_ask = pyfunc("todo_ask")
 save = pyfunc("save")
 selected = pyfunc("selected")
 debug = pyfunc("sg.Print")
@@ -64,16 +73,56 @@ HOME_DIR = str(Path.home())
 TODO_DIR = os.path.join(HOME_DIR, cfg["todo_dir"])
 TODO_TXT_PATH = os.path.join(TODO_DIR, cfg["todo_file"])
 
+
 # ------ Menu Definition ------ #
+def get_menu_key(menu_item_str):
+    return menu_item_str.replace('&', '')
+
+
+task_new = '&New    (Ctrl-N)::task_new'
+task_update = '&Update (Ctrl-U)::task_update'
+task_done = '&Done (Ctrl-U)::task_done'
 menu_def = [
     ['File', ['New', 'Open', 'Print', 'Print Preview', 'Archive Completed Tasks', 'Reload File', 'Options', 'Exit',
               'Properties']],
     ['Edit', ['Cut', 'Copy', 'Copy Task to New Task', 'Paste', 'Undo'], ],
-    ['Task', ['&New']],
+    ['&Task', [task_new], [task_update], [task_done]],
     ['Sort'],
     ['Filter'],
     ['Report', ['Daily']],
     ['Help', 'About'], ]
+
+lualine_history = []
+lualine_count = 0
+
+
+def lualine_eval_print(lua_input):
+    # print read value
+    window['-LUAOUTPUT-'].print('> ', lua_input)
+    global lualine_count
+    lualine_count = lualine_count + 1
+    lualine_history.append(lua_input)
+    # eval
+    lua_output = None
+    error = True
+    try:
+        lua_output = lua.eval(lua_input)
+        error = False
+    except LuaSyntaxError as syntax_error:
+        try:
+            lua_output = lua.execute(lua_input)
+            error = False
+        except LuaSyntaxError as syntax_error_2:
+            lua_output = syntax_error
+        except LuaError as lua_error:
+            lua_output = lua_error
+    except LuaError as lua_error:
+        lua_output = lua_error
+    except:
+        lua_output = "Unexpected error:", sys.exc_info()[0]
+    # print
+    window['-LUAOUTPUT-'].print(str(lua_output), text_color='red' if error else 'green')
+
 
 if __name__ == '__main__':
     todo_list = get_todos(TODO_TXT_PATH)
@@ -116,28 +165,20 @@ if __name__ == '__main__':
         win_event, win_values = window.read()
         if win_event == sg.WIN_CLOSED or win_event == 'Quit':
             break
+        if win_event == 'Up:38':
+            lualine_count -= 1
+            if -1 < lualine_count < len(lualine_history):
+                window['-LUALINE-'].update(lualine_history[lualine_count])
+        if win_event == 'Down:40':
+            lualine_count += 1
+            if -1 < lualine_count < len(lualine_history):
+                window['-LUALINE-'].update(lualine_history[lualine_count])
+        if win_event in (get_menu_key(task_new), 'n:78'):
+            lualine_eval_print("todo_ask()")
         if win_event == '-SUBMIT_LUALINE-':
             # read
-            lua_input = win_values['-LUALINE-']
-            # eval
-            lua_output = None
-            try:
-                lua_output = lua.execute(lua_input)
-            except LuaSyntaxError as syntax_error:
-                try:
-                    lua_output = lua.eval(lua_input)
-                except LuaSyntaxError as syntax_error_2:
-                    lua_output = syntax_error
-                except LuaError as lua_error:
-                    lua_output = lua_error
-            except LuaError as lua_error:
-                lua_output = lua_error
-            except:
-                lua_output = "Unexpected error:", sys.exc_info()[0]
-            # print
-            print(lua_input)
-            window['-LUAOUTPUT-'].print('> ', lua_input, text_color='red')
-            window['-LUAOUTPUT-'].print(str(lua_output), text_color='green')
+            lua_line = win_values['-LUALINE-']
+            lualine_eval_print(lua_line)
             # loop
             window['-LUALINE-'].update("")
         if win_event == 'Daily':
@@ -150,6 +191,6 @@ if __name__ == '__main__':
         if len(win_values['-TODOLIST-']) > 0:
             selected_todo = win_values['-TODOLIST-'][0]
 
-        print(win_event, win_values)
+        print(win_event)
 
     window.close()
