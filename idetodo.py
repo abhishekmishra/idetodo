@@ -1,6 +1,6 @@
 import PySimpleGUI as sg
 from config import read_config
-from todotxt import get_todos, Todo, add_todos, save_todos
+from todotxt import TodoList, Todo
 from pathlib import Path
 import os
 import sys
@@ -15,25 +15,27 @@ def todo_ask():
     todo_text = sg.PopupGetText("Add todo:", "Add todo")
     if todo_text:
         lualine_eval_print("todo('" + todo_text + "')")
+        return todo_text
     else:
         return "cancelled"
 
 
 def todo(todo_txt):
     todo_new = Todo(text=todo_txt)
-    add_todos(todo_list, todo_new)
-    window['-TODOLIST-'].update(todo_list)
+    todos.add_todos(todo_new)
+    window['-TODOLIST-'].update(todos.ls)
+    window['-TODOLIST-'].SetValue([todo_new])
     idx = 0
-    for t in todo_list:
+    for t in todos.ls:
         if t == todo_new:
             break
         idx += 1
-    window['-TODOLIST-'].SetValue([todo_new])
-    window['-TODOLIST-'].set_vscroll_position(idx * 1.0 / len(todo_list))
+    window['-TODOLIST-'].set_vscroll_position(idx * 1.0 / len(todos.ls))
+    return todo_new
 
 
 def save():
-    save_todos(todo_list, TODO_TXT_PATH)
+    todos.save_todos(TODO_TXT_PATH)
 
 
 def update(todo_row):
@@ -47,7 +49,7 @@ def selected():
 
 
 def agenda():
-    weekly_agenda(todo_list)
+    weekly_agenda(todos)
 
 
 lua = LuaRuntime(unpack_returned_tuples=True)
@@ -125,10 +127,10 @@ def lualine_eval_print(lua_input):
 
 
 if __name__ == '__main__':
-    todo_list = get_todos(TODO_TXT_PATH)
+    todos = TodoList(TODO_TXT_PATH)
     selected_todo = None
-    if todo_list is not None and len(todo_list) > 0:
-        selected_todo = todo_list[0]
+    if todos is not None and len(todos.ls) > 0:
+        selected_todo = todos.ls[0]
 
     # TODO: some of the tests below should be moved to a unit test.
     # print(todo_list)
@@ -143,9 +145,7 @@ if __name__ == '__main__':
 
     layout = [
         [sg.Menu(menu_def)],
-        # [sg.Input(default_text="", key="-TODOTEXT-", size=(LAYOUT_WIDTH, None), enable_events=True),
-        #  sg.Button('-SUBMIT_TODOTEXT-', visible=False, bind_return_key=True)],
-        [sg.Listbox(key="-TODOLIST-", values=todo_list,
+        [sg.Listbox(key="-TODOLIST-", values=todos.ls,
                     default_values=[selected_todo], size=(LAYOUT_WIDTH, 20), enable_events=True, auto_size_text=True)],
         # [sg.Button("Quit")],
         [sg.Multiline(default_text="", key="-LUAOUTPUT-", size=(LAYOUT_WIDTH, 5),

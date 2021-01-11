@@ -4,32 +4,44 @@ from datetime import datetime
 import re
 
 
-def get_todos(todo_txt_path):
-    with open(todo_txt_path, "r") as f:
-        todos = f.readlines()
-        todo_ls = []
-        for todo in todos:
-            # print(todo.strip())
-            todo_ls.append(Todo(text=todo.strip()))
-        todo_ls.sort(key=lambda x: x.text)
-        return todo_ls
+class TodoList:
+    """
+    Manages a list of todos read from a source.
+    Allows CRUD function, as well as filter/sort
+    """
 
+    def __init__(self, todo_txt_path):
+        self.todo_txt_path = todo_txt_path
+        self._todos = None
+        self.ls = None
+        self.get_todos()
 
-def add_todos(todo_ls, todo_item):
-    todo_ls.append(todo_item)
-    todo_ls.sort(key=lambda x: x.text)
+    def get_todos(self):
+        with open(self.todo_txt_path, "r") as f:
+            todos = f.readlines()
+            self._todos = []
+            for todo in todos:
+                self._todos.append(Todo(text=todo.strip()))
+            self.update_view()
 
+    def update_view(self):
+        self.ls = sorted(self._todos, key=lambda x: x.text)
 
-def save_todos(todo_ls, todo_txt_path):
-    todo_ls_str = ""
-    i = 0
-    for todo in todo_ls:
-        todo_ls_str += todo.text
-        if i < (len(todo_ls) - 1):
-            todo_ls_str += '\n'
-    with open(todo_txt_path, 'w') as f:
-        f.write(todo_ls_str)
-    return todo_ls_str
+    def add_todos(self, todo_item):
+        self._todos.insert(0, todo_item)
+        todo_item.row = len(self._todos)
+        self.update_view()
+
+    def save_todos(self):
+        todo_ls_str = ""
+        i = 0
+        for todo in self._todos:
+            todo_ls_str += todo.text
+            if i < (len(self._todos) - 1):
+                todo_ls_str += '\n'
+        with open(self.todo_txt_path, 'w') as f:
+            f.write(todo_ls_str)
+        return todo_ls_str
 
 
 def date_to_string(date_obj):
@@ -37,7 +49,8 @@ def date_to_string(date_obj):
 
 
 class Todo:
-    def __init__(self, text=None, task=None, done=False, priority=None, completion_date=None, creation_date=None,
+    def __init__(self, text=None, task=None, done=False, priority=None,
+                 completion_date=None, creation_date=None,
                  due=None,
                  projects=None, contexts=None):
         self.text = text.strip()
