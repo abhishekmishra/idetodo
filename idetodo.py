@@ -9,6 +9,7 @@ from lupa import LuaRuntime, LuaSyntaxError, LuaError
 
 win_values = None
 win_event = None
+todos = None
 
 
 def todo_ask():
@@ -35,7 +36,7 @@ def todo(todo_txt):
 
 
 def save():
-    todos.save_todos(TODO_TXT_PATH)
+    todos.save_todos()
 
 
 def update(todo_row):
@@ -67,6 +68,16 @@ popup_ok = pyfunc("sg.popup_ok")
 agenda = pyfunc("agenda")
 
 """)
+
+
+def update_lua_py_globals():
+    lua.execute("""
+    -- python variables
+    todos = python.eval("todos")
+    win_event = python.eval("win_event")
+    win_values = python.eval("win_values")
+    """)
+
 
 cfg = read_config(lua)
 sg.theme(cfg["theme"])
@@ -128,6 +139,7 @@ def lualine_eval_print(lua_input):
 
 if __name__ == '__main__':
     todos = TodoList(TODO_TXT_PATH)
+
     selected_todo = None
     if todos is not None and len(todos.ls) > 0:
         selected_todo = todos.ls[0]
@@ -163,26 +175,34 @@ if __name__ == '__main__':
     # see docs - persistent window - multiple reads using an event loop
     while True:
         win_event, win_values = window.read()
+        update_lua_py_globals()
+
         if win_event == sg.WIN_CLOSED or win_event == 'Quit':
             break
+
         if win_event == 'Up:38':
             lualine_count -= 1
             if -1 < lualine_count < len(lualine_history):
                 window['-LUALINE-'].update(lualine_history[lualine_count])
+
         if win_event == 'Down:40':
             lualine_count += 1
             if -1 < lualine_count < len(lualine_history):
                 window['-LUALINE-'].update(lualine_history[lualine_count])
+
         if win_event in (get_menu_key(task_new), 'n:78'):
             lualine_eval_print("todo_ask()")
+
         if win_event == '-SUBMIT_LUALINE-':
             # read
             lua_line = win_values['-LUALINE-']
             lualine_eval_print(lua_line)
             # loop
             window['-LUALINE-'].update("")
+
         if win_event == 'Daily':
             agenda()
+
         if win_event == 'About':
             sg.popup_ok("IDETODO v0.01:\nA productivity IDE based on the todo.txt file format. "
                         "UX heavily inspired from todotxt.net", title="About IDETODO v0.01", non_blocking=True,
@@ -191,6 +211,6 @@ if __name__ == '__main__':
         if len(win_values['-TODOLIST-']) > 0:
             selected_todo = win_values['-TODOLIST-'][0]
 
-        print(win_event)
+        # print(win_event)
 
     window.close()
