@@ -20,6 +20,18 @@ def add_todos(todo_ls, todo_item):
     todo_ls.sort(key=lambda x: x.text)
 
 
+def save_todos(todo_ls, todo_txt_path):
+    todo_ls_str = ""
+    i = 0
+    for todo in todo_ls:
+        todo_ls_str += todo.text
+        if i < (len(todo_ls) - 1):
+            todo_ls_str += '\n'
+    with open(todo_txt_path, 'w') as f:
+        f.write(todo_ls_str)
+    return todo_ls_str
+
+
 def date_to_string(date_obj):
     return date_obj.strftime("%Y-%m-%d")
 

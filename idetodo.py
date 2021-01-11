@@ -1,6 +1,6 @@
 import PySimpleGUI as sg
 from config import read_config
-from todotxt import get_todos, Todo, add_todos
+from todotxt import get_todos, Todo, add_todos, save_todos
 from pathlib import Path
 import os
 from view_calendar import weekly_agenda
@@ -20,15 +20,29 @@ def todo(todo_txt):
     window['-TODOLIST-'].set_vscroll_position(idx * 1.0 / len(todo_list))
 
 
+def save():
+    save_todos(todo_list, TODO_TXT_PATH)
+
+
+def update(todo_row):
+    pass
+
+
+def selected():
+    pass
+
+
 lua = LuaRuntime(unpack_returned_tuples=True)
 lua.execute("""
-function popup(text)
-    python.eval("sg.popup_ok('" .. text .. "')")
+function pyfunc(name)
+    return python.eval(name)
 end
 
-function todo(todo_txt)
-    python.eval("todo('" .. todo_txt .. "')")
-end
+todo = pyfunc("todo")
+save = pyfunc("save")
+debug = pyfunc("sg.Print")
+popup_ok = pyfunc("sg.popup_ok")
+
 """)
 
 cfg = read_config(lua)
