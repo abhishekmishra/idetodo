@@ -19,3 +19,8 @@ workflow = {
 			}
 		}
 	}
+
+for k, v in pairs(workflow) do
+    print(k)
+    print(v)
+end
