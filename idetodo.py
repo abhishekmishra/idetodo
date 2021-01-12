@@ -41,6 +41,14 @@ def todo(todo_txt):
     return todo_new
 
 
+def done(t):
+    if t is None:
+        t = selected()
+    t.mark_done()
+    todos.update_view()
+    _refresh_todos(t)
+
+
 def daily_todo(todo_txt, num_days=7):
     """
     Create a number of tasks for the coming days
@@ -97,6 +105,7 @@ function pyfunc(name)
 end
 
 todo = pyfunc("todo")
+done = pyfunc("done")
 daily_todo=pyfunc("daily_todo")
 todo_ask = pyfunc("todo_ask")
 update_ask = pyfunc("update_ask")
@@ -134,7 +143,7 @@ def get_menu_key(menu_item_str):
 
 task_new = '&New    (Ctrl-N)::task_new'
 task_update = '&Update (Ctrl-U)::task_update'
-task_done = '&Done (Ctrl-U)::task_done'
+task_done = '&Done (Ctrl-X)::task_done'
 
 file_reload = '&Reload File  (Ctrl-.)::file_reload'
 menu_def = [
@@ -240,6 +249,9 @@ if __name__ == '__main__':
 
         if win_event in (get_menu_key(file_reload), 'period:190'):
             lualine_eval_print("reload()")
+
+        if win_event in (get_menu_key(task_done), 'x:88'):
+            lualine_eval_print("done(nil)")
 
         if win_event == '-SUBMIT_LUALINE-':
             # read

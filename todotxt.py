@@ -73,6 +73,11 @@ class Todo:
         if due is not None:
             self.set_due(due)
 
+    def mark_done(self):
+        if not self.done:
+            self.done = True
+            self.update_text_from_parts()
+
     def update_parts_from_text(self):
         dirty = False
         self.text = self.text.strip()
