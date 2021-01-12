@@ -241,7 +241,7 @@ if __name__ == '__main__':
             if -1 < lualine_count < len(lualine_history):
                 window['-LUALINE-'].update(lualine_history[lualine_count])
 
-        if win_event in (get_menu_key(task_new), 'n:78'):
+        if win_event in (get_menu_key(task_new), 'n:78', 'n:57'):
             lualine_eval_print("todo_ask()")
 
         if win_event in (get_menu_key(task_update), 'u:85'):
@@ -250,7 +250,7 @@ if __name__ == '__main__':
         if win_event in (get_menu_key(file_reload), 'period:190'):
             lualine_eval_print("reload()")
 
-        if win_event in (get_menu_key(task_done), 'x:88'):
+        if win_event in (get_menu_key(task_done), 'x:88', 'x:53'):
             lualine_eval_print("done(nil)")
 
         if win_event == '-SUBMIT_LUALINE-':
