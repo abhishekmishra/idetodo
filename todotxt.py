@@ -76,6 +76,7 @@ class Todo:
     def mark_done(self):
         if not self.done:
             self.done = True
+            self.completion_date = date.today()
             self.update_text_from_parts()
 
     def update_parts_from_text(self):
