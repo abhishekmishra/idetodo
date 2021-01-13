@@ -1,3 +1,5 @@
+import uuid
+
 from parsimonious.grammar import Grammar
 from parsimonious.nodes import NodeVisitor
 from datetime import datetime, date
@@ -70,8 +72,13 @@ class Todo:
         else:
             self.update_text_from_parts()
 
+        # if the task does not have a due date set it
         if due is not None:
             self.set_due(due)
+
+        # if the task does not have an id, generate it
+        if self.get_id() is None:
+            self.set_id()
 
     def mark_done(self):
         if not self.done:
@@ -141,6 +148,15 @@ class Todo:
 
     def set_due(self, dt):
         self.set_property('due', dt.strftime('%Y-%m-%d'))
+
+    def get_id(self):
+        if 'id' in self.properties:
+            return self.properties['id']
+        else:
+            return None
+
+    def set_id(self):
+        self.set_property('id', str(uuid.uuid4()))
 
     def __str__(self):
         return self.text
