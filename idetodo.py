@@ -41,7 +41,7 @@ def todo(todo_txt):
     return todo_new
 
 
-def done(t):
+def done(t=None):
     if t is None:
         t = selected()
     t.mark_done()
@@ -76,15 +76,18 @@ def reload():
     _refresh_todos(todos.ls[idx])
 
 
-def update_ask(todo_row):
+def update_ask(todo_row=None):
     if todo_row is None:
         todo_row = selected()
     idx = todos.ls.index(todo_row)
     todo_text = sg.PopupGetText("Update todo:", "Update todo", todo_row.text)
-    todo_new = Todo(text=todo_text)
-    todos.replace(idx, todo_new)
-    _refresh_todos(todo_new)
-    return todo_new
+    if todo_text:
+        todo_new = Todo(text=todo_text)
+        todos.replace(idx, todo_new)
+        _refresh_todos(todo_new)
+        return todo_new
+    else:
+        return "cancelled"
 
 
 def selected():
@@ -247,7 +250,7 @@ if __name__ == '__main__':
             lualine_eval_print("todo_ask()")
 
         if win_event in (get_menu_key(task_update), 'u:85'):
-            lualine_eval_print("update_ask(nil)")
+            lualine_eval_print("update_ask()")
 
         if win_event in (get_menu_key(file_reload), 'period:190'):
             lualine_eval_print("reload()")
@@ -256,7 +259,7 @@ if __name__ == '__main__':
             lualine_eval_print("save()")
 
         if win_event in (get_menu_key(task_done), 'x:88', 'x:53'):
-            lualine_eval_print("done(nil)")
+            lualine_eval_print("done()")
 
         if win_event == '-SUBMIT_LUALINE-':
             # read
