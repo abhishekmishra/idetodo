@@ -146,9 +146,11 @@ task_update = '&Update (Ctrl-U)::task_update'
 task_done = '&Done (Ctrl-X)::task_done'
 
 file_reload = '&Reload File  (Ctrl-.)::file_reload'
+file_save = '&Save      (Ctrl-S)::file_save'
 menu_def = [
-    ['&File', ['New', 'Open', 'Print', 'Print Preview', 'Archive Completed Tasks', file_reload, 'Options', 'Exit',
-               'Properties']],
+    ['&File',
+     ['New', 'Open', 'Print', 'Print Preview', 'Archive Completed Tasks', file_reload, file_save, 'Options', 'Exit',
+      'Properties']],
     ['Edit', ['Cut', 'Copy', 'Copy Task to New Task', 'Paste', 'Undo'], ],
     ['&Task', [task_new, task_update, task_done]],
     ['Sort'],
@@ -204,12 +206,12 @@ if __name__ == '__main__':
     # parse_todo_line("x 2021-01-05 create")
     # parse_todo_line("2021-01-05 create")
 
-    LAYOUT_WIDTH = 100
+    LAYOUT_WIDTH = 150
 
     layout = [
         [sg.Menu(menu_def)],
         [sg.Listbox(key="-TODOLIST-", values=todos.ls,
-                    default_values=[selected_todo], size=(LAYOUT_WIDTH, 20), enable_events=True, auto_size_text=True)],
+                    default_values=[selected_todo], size=(LAYOUT_WIDTH, 30), enable_events=True, auto_size_text=True)],
         # [sg.Button("Quit")],
         [sg.Multiline(default_text="", key="-LUAOUTPUT-", size=(LAYOUT_WIDTH, 5),
                       disabled=True, autoscroll=True)],
@@ -249,6 +251,9 @@ if __name__ == '__main__':
 
         if win_event in (get_menu_key(file_reload), 'period:190'):
             lualine_eval_print("reload()")
+
+        if win_event in (get_menu_key(file_save), 's:83'):
+            lualine_eval_print("save()")
 
         if win_event in (get_menu_key(task_done), 'x:88', 'x:53'):
             lualine_eval_print("done(nil)")
