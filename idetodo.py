@@ -79,11 +79,10 @@ def reload():
 def update_ask(todo_row=None):
     if todo_row is None:
         todo_row = selected()
-    idx = todos.ls.index(todo_row)
     todo_text = sg.PopupGetText("Update todo:", "Update todo", todo_row.text)
     if todo_text:
         todo_new = Todo(text=todo_text)
-        todos.replace(idx, todo_new)
+        todos.replace(todo_row, todo_new)
         _refresh_todos(todo_new)
         return todo_new
     else:

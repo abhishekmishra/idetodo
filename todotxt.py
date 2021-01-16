@@ -33,7 +33,8 @@ class TodoList:
         self._todos.insert(0, todo_item)
         self.update_view()
 
-    def replace(self, i, todo_item):
+    def replace(self, todo_row, todo_item):
+        i = self._todos.index(todo_row)
         self._todos[i] = todo_item
         self.update_view()
 
