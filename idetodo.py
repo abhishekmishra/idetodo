@@ -10,6 +10,7 @@ from datetime import date, timedelta
 win_values = None
 win_event = None
 todos = None
+window = None
 
 
 def todo_ask():
@@ -22,15 +23,16 @@ def todo_ask():
 
 
 def _refresh_todos(select=None):
-    window['-TODOLIST-'].update(todos.ls)
-    window['-TODOLIST-'].SetValue([select])
-    idx = 0
-    if select is not None:
-        for t in todos.ls:
-            if t == select:
-                break
-            idx += 1
-    window['-TODOLIST-'].set_vscroll_position(idx * 1.0 / len(todos.ls))
+    if window:
+        window['-TODOLIST-'].update(todos.ls)
+        window['-TODOLIST-'].SetValue([select])
+        idx = 0
+        if select is not None:
+            for t in todos.ls:
+                if t == select:
+                    break
+                idx += 1
+        window['-TODOLIST-'].set_vscroll_position(idx * 1.0 / len(todos.ls))
 
 
 def todo(todo_txt):
@@ -106,6 +108,8 @@ HOME_DIR = str(Path.home())
 TODO_DIR = os.path.join(HOME_DIR, cfg["todotxt"]["todo_dir"])
 TODO_TXT_PATH = os.path.join(TODO_DIR, cfg["todotxt"]["todo_file"])
 
+todos = TodoList(TODO_TXT_PATH)
+
 
 # ------ Menu Definition ------ #
 def get_menu_key(menu_item_str):
@@ -152,8 +156,6 @@ def pyline_eval_print(py_input):
 
 
 if __name__ == '__main__':
-    todos = TodoList(TODO_TXT_PATH)
-
     selected_todo = None
     if todos is not None and len(todos.ls) > 0:
         selected_todo = todos.ls[0]
